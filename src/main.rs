@@ -50,7 +50,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             if let MessageKind::Document { ref data , ..} = message.kind {
                 println!("{:?}", data.mime_type);
                 if data.mime_type == Some("video/webm".to_string()) {
-                    process_message(&cloned_token.clone(), data.file_name.clone(), &data.file_id, &message, &api).await?;
+                    match process_message(&cloned_token.clone(), data.file_name.clone(), &data.file_id, &message, &api).await {
+                        Ok(_) => (),
+                        Err(_) => (),
+                    }
                 }
             }
         }
