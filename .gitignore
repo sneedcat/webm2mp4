@@ -1,2 +1,5 @@
 /target
 .env
+log
+error.log
+Cargo.lock
