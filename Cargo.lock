@@ -1218,6 +1218,7 @@ dependencies = [
  "json",
  "log",
  "log4rs",
+ "regex",
  "serde",
  "serde_json",
  "telegram-bot",

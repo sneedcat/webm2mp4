@@ -38,3 +38,15 @@ pub async fn download_file(token: &str, file_id: &str) -> Result<Vec<u8>, Box<dy
     }
     Ok(buf)
 }
+
+pub async fn download_file_from_link(link: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let https = HttpsConnector::new();
+    let client = Client::builder().build::<_, hyper::Body>(https);
+    let mut res = client.get(Uri::from_str(&link)?).await?;
+    let mut buf = Vec::new();
+    while let Some(next) = res.data().await {
+        let chunk = next?;
+        buf.extend_from_slice(&chunk);
+    }
+    Ok(buf)
+}
