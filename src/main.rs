@@ -156,7 +156,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     set.insert((url, filename));
                 }
                 if set.len() > 0 {
-                    process_links(set, &message, &api).await?;
+                    match process_links(set, &message, &api).await {
+                        Ok(_) => {
+                            info!("Done!");
+                        }
+                        Err(err) => {
+                            warn!("{}", err);
+                        }
+                    }
                 }
             } else {
                 continue;
