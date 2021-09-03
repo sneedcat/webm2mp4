@@ -31,7 +31,7 @@ async fn process_links (
     map: HashSet<(&str, &str)>,
     message: &Message,
     api: &Api,
-) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), Box<dyn std::error::Error>> {
     for item in map {
         let buf = match process_link(item.0).await {
             Ok(buf) => buf,
@@ -46,18 +46,20 @@ async fn process_links (
             .to_str()
             .unwrap()
             .to_owned();
-        match api.send(message.video_reply(InputFileUpload::with_data(
-            buf,
-            format!("{}.mp4", base_name),
-        )))
-        .await {
-            Ok(_) => {
-                info!("Sent video to {}", message.chat.id());
+        match api.send(
+            message.document_reply(InputFileUpload::with_data(
+                    buf,
+                    format!("{}.mp4", base_name),
+                    ))
+            )
+            .await {
+                Ok(_) => {
+                    info!("Sent video to {}", message.chat.id());
+                }
+                Err(e) => {
+                    warn!("Failed to send video to {}: {}", message.chat.id(), e);
+                }
             }
-            Err(e) => {
-                warn!("Failed to send video to {}: {}", message.chat.id(), e);
-            }
-        }
     }
     Ok(())
 }
@@ -68,7 +70,7 @@ async fn process_message(
     file_id: &str,
     message: &Message,
     api: &Api,
-) -> Result<(), Box<dyn std::error::Error>> {
+    ) -> Result<(), Box<dyn std::error::Error>> {
     let base_name = match file_name {
         Some(s) => {
             let file_name = s;
@@ -83,11 +85,11 @@ async fn process_message(
     };
     match process_file(&token, &file_id).await {
         Ok(buf) => {
-            api.send(message.video_reply(InputFileUpload::with_data(
-                buf,
-                format!("{}.mp4", base_name),
-            )))
-            .await?;
+            api.send(message.document_reply(InputFileUpload::with_data(
+                        buf,
+                        format!("{}.mp4", base_name),
+                        )))
+                .await?;
         }
         Err(_) => {
             api.send(message.text_reply("Something went wrong")).await?;
@@ -128,16 +130,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         &data.file_id,
                         &message,
                         &api,
-                    )
-                    .await
-                    {
-                        Ok(_) => {
-                            info!("Done!");
+                        )
+                        .await
+                        {
+                            Ok(_) => {
+                                info!("Done!");
+                            }
+                            Err(err) => {
+                                warn!("{}", err);
+                            }
                         }
-                        Err(err) => {
-                            warn!("{}", err);
-                        }
-                    }
                 }
             } else if let MessageKind::Text { ref data, .. } = message.kind {
                 let matches = regex.captures_iter(data);
